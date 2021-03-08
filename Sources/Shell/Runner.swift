@@ -13,7 +13,7 @@ import Foundation
 ///   - stdout: FileHandle or Pipe
 ///   - stderr: FileHandle or Pipe
 /// - Throws: CommandError
-func runInner(_ executablePath: String, args: [String], stdin: Any?, stdout: Any, stderr: Any?) throws -> (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)
+func runInner(_ executablePath: String, args: [String], stdin: Any?, stdout: Any?, stderr: Any?) throws -> (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)
 {
     let process = Process()
     process.arguments = args
