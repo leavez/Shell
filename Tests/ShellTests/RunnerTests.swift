@@ -82,4 +82,15 @@ final class RunnerTests: XCTestCase {
         XCTAssertEqual(String(data: outData, encoding: .utf8), workspace + "\n/bin\n")
         XCTAssertEqual(terminatedCalled, true)
     }
+    
+    func test_runInner_duration() throws {
+        let m = XCTClockMetric()
+        
+        measure(metrics: [m]) {
+            let p2 = Pipe()
+            let (_, _ ,wait) = try! runInner("/bin/bash", args: ["-c", "echo 1"], stdin: nil, stdout: p2, stderr: nil, otherParams: nil)
+            _ = p2.fileHandleForReading.readDataToEndOfFile()
+            wait()
+        }
+    }
 }
