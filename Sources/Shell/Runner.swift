@@ -9,11 +9,11 @@ import Foundation
 
 public struct RunParams {
     /// Override the environment variables, or it will inherit current process's by default.
-    var environment: [String : String]?
+    public var environment: [String : String]?
     /// Set the working directory
-    var currentDirectory: String?
+    public var currentDirectory: String?
     /// TerminationHandler will call before sync run finished, in another thread.
-    var terminationHandler: ((Process) -> Void)?
+    public var terminationHandler: ((Process) -> Void)?
 }
 
 
