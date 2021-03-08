@@ -60,9 +60,4 @@ final class RunnerTests: XCTestCase {
             XCTAssertEqual(err.localizedDescription, "The file “bash1” doesn’t exist.")
         }
     }
-    
-    func test_CommandError() {
-        let err: Error = CommandError.returnedErrorCode(errorCode: 11, stderr: Data(), command: nil)
-        XCTAssertEqual(err.localizedDescription, "Command exited with code 11: ")
-    }
 }

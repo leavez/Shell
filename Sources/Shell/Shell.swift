@@ -20,7 +20,7 @@ public func run(_ executable: String, args: [String] ) -> RunOutput {
     do {
         run = try runInner(path, args: args, stdin: nil, stdout: outPipe, stderr: errPipe)
     } catch let err {
-        return RunOutput(raw: .launchFailed(err))
+        return RunOutput(raw: .throwError(err))
     }
     let (process, group, waitFunc) = run
     
@@ -33,7 +33,7 @@ public func run(_ executable: String, args: [String] ) -> RunOutput {
     waitFunc()
     
     return RunOutput(
-        raw: .returned(code: process.terminationStatus, stdout: stdoutData, stderr: stderrData),
+        raw: .finished(code: process.terminationStatus, stdout: stdoutData, stderr: stderrData),
         commandDescription: process.visualization()
     )
 }

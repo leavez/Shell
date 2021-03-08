@@ -15,37 +15,44 @@ public final class RunOutput {
     /// Recommended to check the error before calling other methods
     public func error() -> CommandError? {
         switch raw {
-        case .launchFailed(let err):
+        case .throwError(let err):
             return .launchFailed(err)
-        case let .returned(code: code, stdout: _, stderr: errData):
+        case let .finished(code: code, stdout: _, stderr: errData):
             if code == 0 {
                 return nil
             }
-            return .returnedErrorCode(errorCode: code, stderr: errData ?? Data(), command: commandDescription())
+            return .returnedErrorCode(errorCode: code, stderr: errData ?? Data(), command: command())
         }
     }
     
     /// The terminated status of the command
     public private(set) lazy var exitCode: Int32 = {
         switch raw {
-        case .launchFailed(_):
-            return 256
-        case let .returned(code: code, stdout: _, stderr: _):
+        case let .throwError(err):
+            if let err = err as? CocoaError, err.code == CocoaError.fileNoSuchFile {
+                return 127 // bash convention
+            } else {
+                return 256 // actually not returned, we give a fake code
+            }
+        case let .finished(code: code, stdout: _, stderr: _):
             return code
         }
     }()
     
     // Whether command executed successfully and exit code 0
     public var succeeded: Bool {
-        exitCode == 0
+        if case let .finished(code, _, _) = raw {
+            return code == 0
+        }
+        return false
     }
     
     // Standard output in string
     public private(set) lazy var stdout: String = {
         switch raw {
-        case .launchFailed(_):
+        case .throwError(_):
             return ""
-        case .returned(code: _, stdout: let data, stderr: _):
+        case .finished(code: _, stdout: let data, stderr: _):
             return stringOutput(data)
         }
     }()
@@ -53,9 +60,9 @@ public final class RunOutput {
     // Standard error in string
     public private(set) lazy var stderror: String = {
         switch raw {
-        case .launchFailed(_):
+        case .throwError(_):
             return ""
-        case .returned(code: _, stdout: _, stderr: let data):
+        case .finished(code: _, stdout: _, stderr: let data):
             return stringOutput(data)
         }
     }()
@@ -72,17 +79,17 @@ public final class RunOutput {
     
     // MAKR: -
     
-    enum RawResult {
-        case launchFailed(Error)
-        case returned(code: Int32, stdout: Data?, stderr: Data?)
+    enum Result {
+        case throwError(Error)
+        case finished(code: Int32, stdout: Data?, stderr: Data?)
     }
     
-    private let raw: RawResult
-    private let commandDescription: ()->String?
+    private let raw: Result
+    private let command: ()->String?
     
-    init(raw: RawResult, commandDescription: @escaping @autoclosure ()->String? = nil) {
+    init(raw: Result, commandDescription: @escaping @autoclosure ()->String? = nil) {
         self.raw = raw
-        self.commandDescription = commandDescription
+        self.command = commandDescription
     }
 }
 

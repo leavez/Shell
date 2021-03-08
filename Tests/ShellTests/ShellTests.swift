@@ -29,13 +29,14 @@ final class ShellTests: XCTestCase {
         XCTAssertEqual(r.stderror, "456\n")
     }
     
-    func testShellRun_not_fount() {
+    func testShellRun_not_found() {
         let r = Shell.run("thereShouldNotBeThisTool")
         if let err = r.error(), case let .launchFailed(innerErr) = err {
             XCTAssertTrue(innerErr.localizedDescription.contains("doesn’t exist"))
         } else {
             XCTAssertFalse(true)
         }
+        XCTAssertEqual(r.exitCode, 127)
         XCTAssertEqual(r.stdout, "")
         XCTAssertEqual(r.stderror, "")
     }
