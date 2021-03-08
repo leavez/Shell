@@ -1,10 +1,14 @@
 
 import Foundation
 
+/// Run an executable with args
+/// - Parameters:
+///   - executable: the file path, or simply the filename and lookup in $PATH
 public func run(_ executable: String, _ args: String ...) -> RunOutput {
     return run(executable, args: args)
 }
 
+// Run an executable with args
 public func run(_ executable: String, args: [String] ) -> RunOutput {
     // convert to absolute path
     var path = executable
@@ -38,11 +42,15 @@ public func run(_ executable: String, args: [String] ) -> RunOutput {
     )
 }
 
+// Run an executable with args, and print output to stdout/stderr
+/// - Parameters:
+///   - executable: the file path, or simply the filename and lookup in $PATH
 /// - Throws: CommandError
 public func runAndPrint(_ executable: String, _ args: String ...) throws {
     try runAndPrint(executable, args: args)
 }
 
+// Run an executable with args, and print output to stdout/stderr
 /// - Throws: CommandError
 public func runAndPrint(_ executable: String, args: [String]) throws {
     // convert to absolute path
@@ -70,19 +78,24 @@ public func runAndPrint(_ executable: String, args: [String]) throws {
 
 // -- bash script --
 
+// Run a bash script
 public func run(bash script: String, _ args: String ...) -> RunOutput {
     return run(bash: script, args: args)
 }
 
+// Run a bash script
 public func run(bash script: String, args: [String]) -> RunOutput {
     return run("/bin/bash", args: ["-c", script] + args)
 }
 
+// Run a bash script, and print output to stdout/stderr
 /// - Throws: CommandError
 public func runAndPrint(bash script: String, _ args: String ...) throws {
     try runAndPrint(bash: script, args: args)
 }
 
+// Run a bash script, and print output to stdout/stderr
+/// - Throws: CommandError
 public func runAndPrint(bash script: String, args: [String]) throws {
     try runAndPrint("/bin/bash", args: ["-c", script] + args)
 }
