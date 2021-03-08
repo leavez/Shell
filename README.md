@@ -2,7 +2,7 @@
 
 Simple framework to run shell commands, fast.
 
-```
+```swift
 // -- run and get result --
 let output = Shell.run("ls")
 if let err = output.error() {
