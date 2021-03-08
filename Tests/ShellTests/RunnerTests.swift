@@ -43,6 +43,14 @@ final class RunnerTests: XCTestCase {
         XCTAssertEqual(String(data: errData, encoding: .utf8), output)
     }
     
+    func test_runInner_longTime() throws {
+        let p2 = Pipe()
+        let (_, _ ,wait) = try runInner("/bin/bash", args: ["-c", "echo 1; sleep 3; echo 2"], stdin: nil, stdout: p2, stderr: nil)
+        let errData = p2.fileHandleForReading.readDataToEndOfFile()
+        wait()
+        XCTAssertEqual(String(data: errData, encoding: .utf8), "1\n2\n")
+    }
+    
     func test_runInner_error() throws {
         do {
             let (_, _ , _) = try runInner("/bin/bash1", args: ["1"], stdin: nil, stdout: FileHandle.nullDevice, stderr: nil)
