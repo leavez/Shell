@@ -31,15 +31,11 @@ func runInner(_ executablePath: String, args: [String], stdin: Any?, stdout: Any
     process.terminationHandler = { _ in
         group.leave()
     }
-    do {
-        group.enter()
-        if #available(OSX 10.13, *) {
-            try process.run()
-        } else {
-            process.launch()
-        }
-    } catch let err {
-        throw CommandError.launchFailed(err)
+    group.enter()
+    if #available(OSX 10.13, *) {
+        try process.run()
+    } else {
+        process.launch()
     }
     
     return (process: process, waitGroup: group, waitFunc: { group.wait() })
@@ -60,32 +56,6 @@ func lookupInPATH(file: String) -> String? {
         }
     }
     return nil
-}
-
-public enum CommandError: Error, LocalizedError, CustomStringConvertible {
-    
-    /** Command could not be executed. */
-    case launchFailed(Error)
-    
-    /** Exit code was not zero. */
-    case returnedErrorCode(errorCode: Int32, stderr: Data, command: String?)
-    
-    
-    // -- CustomStringConvertible --
-    
-    public var description: String {
-        switch self {
-        case let .returnedErrorCode(code, stderr, command):
-            let errorOutput = String(data: stderr, encoding: .utf8) ?? ""
-            let c = command.map({ " '\($0)'"}) ?? ""
-            return "Command\(c) exited with code \(code): \(errorOutput)"
-        case let .launchFailed(err):
-            return "Command launch failed: \(err.localizedDescription)"
-        }
-    }
-    public var errorDescription: String? {
-        description
-    }
 }
 
 extension Process {

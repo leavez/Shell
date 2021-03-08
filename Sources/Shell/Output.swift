@@ -86,6 +86,34 @@ public final class RunOutput {
     }
 }
 
+public enum CommandError: Error, LocalizedError, CustomStringConvertible {
+    
+    /** Command could not be executed. */
+    case launchFailed(Error)
+    
+    /** Exit code was not zero. */
+    case returnedErrorCode(errorCode: Int32, stderr: Data, command: String?)
+    
+    
+    // -- CustomStringConvertible --
+    
+    public var description: String {
+        switch self {
+        case let .returnedErrorCode(code, stderr, command):
+            let errorOutput = String(data: stderr, encoding: .utf8) ?? ""
+            let c = command.map({ " '\($0)'"}) ?? ""
+            return "Command\(c) exited with code \(code): \(errorOutput)"
+        case let .launchFailed(err):
+            return "Command launch failed: \(err.localizedDescription)"
+        }
+    }
+    public var errorDescription: String? {
+        description
+    }
+}
+
+
+
 // Convert stream to string, trimmed if text is single-line
 private func stringOutput(_ data: Data?) -> String {
     guard let data = data else {

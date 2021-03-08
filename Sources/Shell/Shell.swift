@@ -52,16 +52,19 @@ public func runAndPrint(_ executable: String, args: [String]) throws {
     }
     
     // run
-    let (process, _, waitFunc) = try runInner(path, args: args, stdin: nil, stdout: FileHandle.standardOutput, stderr: FileHandle.standardError)
+    var run: (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)!
+    do {
+        run = try runInner(path, args: args, stdin: nil, stdout: FileHandle.standardOutput, stderr: FileHandle.standardError)
+    } catch let err {
+        throw CommandError.launchFailed(err)
+    }
+    let (process, _, waitFunc) = run
     
     waitFunc()
     
-    let output = RunOutput(
-        raw: .returned(code: process.terminationStatus, stdout: nil, stderr: nil),
-        commandDescription: process.visualization()
-    )
-    if let err = output.error() {
-        throw err
+    let exitCode = process.terminationStatus
+    if exitCode != 0 {
+        throw CommandError.returnedErrorCode(errorCode: exitCode, stderr: Data(), command: process.visualization())
     }
 }
 
