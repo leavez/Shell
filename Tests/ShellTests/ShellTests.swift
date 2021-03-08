@@ -31,8 +31,8 @@ final class ShellTests: XCTestCase {
     
     func testShellRun_not_fount() {
         let r = Shell.run("thereShouldNotBeThisTool")
-        if let err = r.error(), case let .inAccessibleExecutable(path: path) = err {
-            XCTAssertEqual(path, "thereShouldNotBeThisTool")
+        if let err = r.error(), case let .launchFailed(innerErr) = err {
+            XCTAssertTrue(innerErr.localizedDescription.contains("doesn’t exist"))
         } else {
             XCTAssertFalse(true)
         }
@@ -61,8 +61,8 @@ final class ShellTests: XCTestCase {
             XCTAssertFalse(true)
         } catch let err  {
             if let err = err as? CommandError,
-               case let .inAccessibleExecutable(path: path) = err {
-                XCTAssertEqual(path, "thereShouldNotBeThisTool")
+               case let .launchFailed(innerErr) = err {
+                XCTAssertTrue(innerErr.localizedDescription.contains("doesn’t exist"), innerErr.localizedDescription)
             } else {
                 XCTAssertFalse(true)
             }

@@ -38,10 +38,8 @@ func runInner(_ executablePath: String, args: [String], stdin: Any?, stdout: Any
         } else {
             process.launch()
         }
-    } catch CocoaError.fileNoSuchFile {
-        throw CommandError.inAccessibleExecutable(path: executablePath)
     } catch let err {
-        throw CommandError.otherLaunchFailed(err)
+        throw CommandError.launchFailed(err)
     }
     
     return (process: process, waitGroup: group, waitFunc: { group.wait() })
@@ -67,8 +65,7 @@ func lookupInPATH(file: String) -> String? {
 public enum CommandError: Error, LocalizedError, CustomStringConvertible {
     
     /** Command could not be executed. */
-    case inAccessibleExecutable(path: String)
-    case otherLaunchFailed(Error)
+    case launchFailed(Error)
     
     /** Exit code was not zero. */
     case returnedErrorCode(errorCode: Int32, stderr: Data, command: String?)
@@ -82,9 +79,7 @@ public enum CommandError: Error, LocalizedError, CustomStringConvertible {
             let errorOutput = String(data: stderr, encoding: .utf8) ?? ""
             let c = command.map({ " '\($0)'"}) ?? ""
             return "Command\(c) exited with code \(code): \(errorOutput)"
-        case let .inAccessibleExecutable(path):
-            return "Inaccessible executable at path '\(path)'."
-        case let .otherLaunchFailed(err):
+        case let .launchFailed(err):
             return "Command launch failed: \(err.localizedDescription)"
         }
     }

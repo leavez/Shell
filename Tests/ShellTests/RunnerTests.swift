@@ -48,8 +48,8 @@ final class RunnerTests: XCTestCase {
             let (_, _ , _) = try runInner("/bin/bash1", args: ["1"], stdin: nil, stdout: FileHandle.nullDevice, stderr: nil)
             XCTAssertFalse(true)
         } catch let err {
-            if let err = err as? CommandError, case let .inAccessibleExecutable(path) = err {
-                XCTAssertEqual(path, "/bin/bash1")
+            if let err = err as? CommandError, case let .launchFailed(innerError) = err {
+                XCTAssertEqual(innerError.localizedDescription, "The file “bash1” doesn’t exist.")
             } else {
                 XCTAssertFalse(true)
             }

@@ -16,10 +16,7 @@ public final class RunOutput {
     public func error() -> CommandError? {
         switch raw {
         case .launchFailed(let err):
-            if let err = err as? CommandError {
-                return err
-            }
-            return .otherLaunchFailed(err)
+            return .launchFailed(err)
         case let .returned(code: code, stdout: _, stderr: errData):
             if code == 0 {
                 return nil

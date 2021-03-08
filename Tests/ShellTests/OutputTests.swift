@@ -18,7 +18,7 @@ final class OutputTests: XCTestCase {
     
     func test_RunOutput_errored() {
         let r = RunOutput(raw: .launchFailed("dd"))
-        if let err = r.error(), case let .otherLaunchFailed(innerErr) = err {
+        if let err = r.error(), case let .launchFailed(innerErr) = err {
             XCTAssertEqual(innerErr.localizedDescription, "dd")
         } else {
             XCTAssertFalse(true)
