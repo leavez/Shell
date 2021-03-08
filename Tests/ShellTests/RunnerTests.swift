@@ -68,12 +68,12 @@ final class RunnerTests: XCTestCase {
             workspace = "/private" + workspace
         }
         
-        let params = RunParams(
-            environment: ["PATH": "/bin"],
-            currentDirectory: workspace,
-            terminationHandler: { _ in
-                terminatedCalled = true
-            })
+        var params = RunParams()
+        params.environment = ["PATH": "/bin"]
+        params.currentDirectory = workspace
+        params.terminationHandler = { _ in
+            terminatedCalled = true
+        }
         
         let p1 = Pipe()
         let (_, _ , wait) = try runInner("/bin/bash", args: ["-c", "pwd; echo $PATH"], stdin: nil, stdout: p1, stderr: nil, otherParams: params)

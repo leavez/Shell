@@ -14,7 +14,10 @@ public struct RunParams {
     public var currentDirectory: String?
     /// TerminationHandler will call before sync run finished, in another thread.
     public var terminationHandler: ((Process) -> Void)?
+    
+    public init() {}
 }
+
 
 
 /// - Parameters:
