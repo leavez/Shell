@@ -7,36 +7,50 @@
 
 import Foundation
 
+public struct RunParams {
+    /// Override the environment variables, or it will inherit current process's by default.
+    var environment: [String : String]?
+    /// Set the working directory
+    var currentDirectory: String?
+    /// TerminationHandler will call before sync run finished, in another thread.
+    var terminationHandler: ((Process) -> Void)?
+}
+
+
 /// - Parameters:
 ///   - executablePath: The absolute path to executable
 ///   - stdin: FileHandle or Pipe, if Pipe, it will automatically close
 ///   - stdout: FileHandle or Pipe
 ///   - stderr: FileHandle or Pipe
 /// - Throws: CommandError
-func runInner(_ executablePath: String, args: [String], stdin: Any?, stdout: Any?, stderr: Any?) throws -> (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)
+func runInner(_ executablePath: String, args: [String], stdin: Any?, stdout: Any?, stderr: Any?, otherParams: RunParams?) throws -> (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)
 {
     let process = Process()
     process.arguments = args
-    if #available(OSX 10.13, *) {
-        process.executableURL = URL(fileURLWithPath: executablePath)
-    } else {
-        process.launchPath = executablePath
-    }
+    process.executableURL = URL(fileURLWithPath: executablePath)
     
     process.standardInput = stdin
     process.standardOutput = stdout
     process.standardError = stderr
     
+    if let otherParams = otherParams {
+        if let environment = otherParams.environment {
+            process.environment = environment
+        }
+        if let currentDirectory = otherParams.currentDirectory {
+            process.currentDirectoryURL = URL(fileURLWithPath: currentDirectory)
+        }
+    }
+    
     let group = DispatchGroup()
     process.terminationHandler = { _ in
+        if let otherParams = otherParams, let handler = otherParams.terminationHandler {
+            handler(process)
+        }
         group.leave()
     }
     group.enter()
-    if #available(OSX 10.13, *) {
-        try process.run()
-    } else {
-        process.launch()
-    }
+    try process.run()
     
     return (process: process, waitGroup: group, waitFunc: { group.wait() })
 }

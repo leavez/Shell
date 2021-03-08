@@ -8,8 +8,8 @@ public func run(_ executable: String, _ args: String ...) -> RunOutput {
     return run(executable, args: args)
 }
 
-// Run an executable with args
-public func run(_ executable: String, args: [String] ) -> RunOutput {
+/// Run an executable with args
+public func run(_ executable: String, args: [String], otherParams: RunParams? = nil) -> RunOutput {
     // convert to absolute path
     var path = executable
     if !path.contains("/"), let found = lookupInPATH(file: executable) {
@@ -22,7 +22,7 @@ public func run(_ executable: String, args: [String] ) -> RunOutput {
     
     var run: (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)!
     do {
-        run = try runInner(path, args: args, stdin: nil, stdout: outPipe, stderr: errPipe)
+        run = try runInner(path, args: args, stdin: nil, stdout: outPipe, stderr: errPipe, otherParams: otherParams)
     } catch let err {
         return RunOutput(raw: .throwError(err))
     }
@@ -42,7 +42,7 @@ public func run(_ executable: String, args: [String] ) -> RunOutput {
     )
 }
 
-// Run an executable with args, and print output to stdout/stderr
+/// Run an executable with args, and print output to stdout/stderr
 /// - Parameters:
 ///   - executable: the file path, or simply the filename and lookup in $PATH
 /// - Throws: CommandError
@@ -50,9 +50,9 @@ public func runAndPrint(_ executable: String, _ args: String ...) throws {
     try runAndPrint(executable, args: args)
 }
 
-// Run an executable with args, and print output to stdout/stderr
+/// Run an executable with args, and print output to stdout/stderr
 /// - Throws: CommandError
-public func runAndPrint(_ executable: String, args: [String]) throws {
+public func runAndPrint(_ executable: String, args: [String], otherParams: RunParams? = nil) throws {
     // convert to absolute path
     var path = executable
     if !path.contains("/"), let found = lookupInPATH(file: executable) {
@@ -62,7 +62,7 @@ public func runAndPrint(_ executable: String, args: [String]) throws {
     // run
     var run: (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)!
     do {
-        run = try runInner(path, args: args, stdin: nil, stdout: FileHandle.standardOutput, stderr: FileHandle.standardError)
+        run = try runInner(path, args: args, stdin: nil, stdout: FileHandle.standardOutput, stderr: FileHandle.standardError, otherParams: otherParams)
     } catch let err {
         throw CommandError.launchFailed(err)
     }
@@ -78,25 +78,25 @@ public func runAndPrint(_ executable: String, args: [String]) throws {
 
 // -- bash script --
 
-// Run a bash script
+/// Run a bash script
 public func run(bash script: String, _ args: String ...) -> RunOutput {
     return run(bash: script, args: args)
 }
 
-// Run a bash script
-public func run(bash script: String, args: [String]) -> RunOutput {
-    return run("/bin/bash", args: ["-c", script] + args)
+/// Run a bash script
+public func run(bash script: String, args: [String], otherParams: RunParams? = nil) -> RunOutput {
+    return run("/bin/bash", args: ["-c", script] + args, otherParams: otherParams)
 }
 
-// Run a bash script, and print output to stdout/stderr
+/// Run a bash script, and print output to stdout/stderr
 /// - Throws: CommandError
 public func runAndPrint(bash script: String, _ args: String ...) throws {
     try runAndPrint(bash: script, args: args)
 }
 
-// Run a bash script, and print output to stdout/stderr
+/// Run a bash script, and print output to stdout/stderr
 /// - Throws: CommandError
-public func runAndPrint(bash script: String, args: [String]) throws {
-    try runAndPrint("/bin/bash", args: ["-c", script] + args)
+public func runAndPrint(bash script: String, args: [String], otherParams: RunParams? = nil) throws {
+    try runAndPrint("/bin/bash", args: ["-c", script] + args, otherParams: otherParams)
 }
 
