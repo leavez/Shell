@@ -16,7 +16,7 @@ extension String: LocalizedError {
 
 final class OutputTests: XCTestCase {
     
-    func test_RunOutput_errored() {
+    func test_RunOutput_errored() throws {
         let r = RunOutput(raw: .throwError("dd"))
         if let err = r.error(), case let .launchFailed(innerErr) = err {
             XCTAssertEqual(innerErr.localizedDescription, "dd")
@@ -29,9 +29,10 @@ final class OutputTests: XCTestCase {
         XCTAssertEqual(r.stderror, "")
         XCTAssertEqual(r.stdoutTrimmed, "")
         XCTAssertEqual(r.stderrTrimmed, "")
+        XCTAssertThrowsError(try r.throwIfError())
     }
     
-    func test_RunOutput_succeeded() {
+    func test_RunOutput_succeeded() throws {
         let r = RunOutput(raw: .finished(code: 0, stdout: "123\n".data(using: .utf8), stderr: "456\n".data(using: .utf8)))
         XCTAssertNil(r.error())
         XCTAssertEqual(r.exitCode, 0)
@@ -40,6 +41,8 @@ final class OutputTests: XCTestCase {
         XCTAssertEqual(r.stderror, "456\n")
         XCTAssertEqual(r.stdoutTrimmed, "123")
         XCTAssertEqual(r.stderrTrimmed, "456")
+        let n = try r.throwIfError()
+        XCTAssertTrue(n === r)
     }
     
     func test_RunOutput_failed() {

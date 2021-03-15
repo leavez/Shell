@@ -77,6 +77,13 @@ public final class RunOutput {
         stderror.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
+    public func throwIfError() throws -> Self {
+        if let err = error() {
+            throw err
+        }
+        return self
+    }
+    
     // MAKR: -
     
     enum Result {
