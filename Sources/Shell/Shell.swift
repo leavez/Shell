@@ -28,11 +28,11 @@ public func run(_ executable: String, args: [String], otherParams: RunParams? = 
     }
     let (process, group, waitFunc) = run
     
-    let stdoutData = outPipe.fileHandleForReading.readDataToEndOfFile()
     var stderrData: Data!
     DispatchQueue.global().async(group: group) {
         stderrData = errPipe.fileHandleForReading.readDataToEndOfFile()
     }
+    let stdoutData = outPipe.fileHandleForReading.readDataToEndOfFile()
     
     waitFunc()
     
