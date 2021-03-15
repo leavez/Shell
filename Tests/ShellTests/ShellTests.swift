@@ -50,6 +50,18 @@ final class ShellTests: XCTestCase {
         #endif
     }
     
+    func testShellRun_longOutput() {
+        // more then the buffer length
+        let count = 100000
+        let stdout = Shell.run("bash", "-c", "for i in {1..\(count)}; do >&1 echo 'Welcome'; done")
+        XCTAssertTrue(stdout.succeeded)
+        XCTAssertEqual(stdout.stdout, String(repeating: "Welcome\n", count: count))
+        
+        let stderr = Shell.run("bash", "-c", "for i in {1..\(count)}; do >&2 echo 'Welcome'; done")
+        XCTAssertTrue(stderr.succeeded)
+        XCTAssertEqual(stderr.stderror, String(repeating: "Welcome\n", count: count))
+    }
+    
     // --- test run and print ---
     
     func testRunAndPrint_succeed() throws {
