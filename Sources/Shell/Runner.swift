@@ -59,7 +59,7 @@ func runInner(_ executablePath: String, args: [String], stdin: Any?, stdout: Any
 }
 
 func lookupInPATH(file: String) -> String? {
-    let PATH = String(utf8String: getenv("PATH")) ?? ""
+    let PATH = ProcessInfo.processInfo.environment["PATH"] ?? ""
     
     for dir in PATH.split(separator: ":") {
         let path = URL(fileURLWithPath: String(dir))
