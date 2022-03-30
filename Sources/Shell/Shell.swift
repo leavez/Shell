@@ -19,6 +19,13 @@ public func run(_ executable: String, args: [String], otherParams: RunParams? = 
     // run
     let outPipe = Pipe()
     let errPipe = Pipe()
+    defer {
+        // Although Apple doc says no need to close, the fd will run out when
+        // call `run` many times within same process if we didn't add these lines
+        // https://stackoverflow.com/a/31782403/2272825
+        outPipe.fileHandleForReading.closeFile()
+        errPipe.fileHandleForReading.closeFile()
+    }
     
     var run: (process: Process, waitGroup: DispatchGroup, waitFunc: ()->Void)!
     do {
