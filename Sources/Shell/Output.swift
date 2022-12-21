@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by leave on 3/5/21.
 //
@@ -47,24 +47,34 @@ public final class RunOutput {
         return false
     }
     
-    // Standard output in string
-    public private(set) lazy var stdout: String = {
+    /// Standard output data
+    public var rawStdout: Data? {
         switch raw {
         case .throwError(_):
-            return ""
+            return nil
         case .finished(code: _, stdout: let data, stderr: _):
-            return stringOutput(data)
+            return data
         }
+    }
+
+    /// Standard error data
+    public var rawStderr: Data? {
+        switch raw {
+        case .throwError(_):
+            return nil
+        case .finished(code: _, stdout: _, stderr: let data):
+            return data
+        }
+    }
+    
+    // Standard output in string
+    public private(set) lazy var stdout: String = {
+        rawStdout.map{ stringOutput($0) } ?? ""
     }()
 
     // Standard error in string
     public private(set) lazy var stderror: String = {
-        switch raw {
-        case .throwError(_):
-            return ""
-        case .finished(code: _, stdout: _, stderr: let data):
-            return stringOutput(data)
-        }
+        rawStderr.map{ stringOutput($0) } ?? ""
     }()
     
     /// Standard output, trimmed whitespace and newline
